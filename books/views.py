@@ -1,5 +1,6 @@
 # Create your views here.
 
+from django.http.response import FileResponse
 from books.models import book
 from os import name
 from django.http import HttpResponse, request
@@ -9,6 +10,11 @@ from .models import book
 gen = []
 lang = []
 
+def hyphen(string):
+    string =  string.replace("\n", "")
+    string =  string.replace(" ", "-")
+    return string.lower()
+    
 def index(request):
     #return render(request, 'homepage.html')
     param = book.objects.all()
@@ -29,7 +35,9 @@ def add_book(request):
 def added(request):
     name = request.GET.get('Book name', '')
     genre = request.GET.get('Genre', '')
+    genre = hyphen(genre)
     language = request.GET.get('Language', '')
+    language = hyphen(language)
     author = request.GET.get('Author', '')
     new_book = book(book_name=name, genre=genre, author=author, language=language)
     new_book.save()
@@ -41,6 +49,7 @@ def apply(request):
     lang_needed = []
     for a in gen:
         check = request.GET.get(a, 'off')
+        print('for a = ', a, 'check is ', check)
         if(check=='on'):
             genre_needed.append(a)
             for books in book.objects.filter(genre=a):
@@ -50,11 +59,16 @@ def apply(request):
         if(check=='on'):
             lang_needed.append(a)
             for books in book.objects.filter(language=a):
-                if(books not in filtration):
+                if len(genre_needed)==0:
+                    filtration.append(books)
+                elif(books not in filtration):
                     if(books.genre in genre_needed):
                         filtration.append(books)
-    for a in filtration:
-        if(a.language not in lang_needed):
-            filtration.remove(a)
+     
+    if(len(lang_needed)!=0):
+        for a in filtration:
+            if(a.language not in lang_needed):
+                filtration.remove(a)
+                print(a)
     
     return render(request, 'books/applying.html', {'filtration':filtration})

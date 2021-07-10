@@ -65,7 +65,8 @@
                     <a class="test" tabindex="-1" >Genre <span class="caret"></span></a>
 
                     <ul class="dropdown-menu">
-                        <form action="apply" method="get">
+                        <form action="apply/" method="get">
+                            {% csrf_token %}
                         {%for i in gen%}
                         <!--For loop-->
                         <li>
